@@ -174,92 +174,8 @@ class _DashboardPageState extends State<DashboardPage> {
             itemCount: courses.length,
             itemBuilder: (context, index) {
               final course = courses[index] as Map<String, dynamic>;
-              final String status = course['status'] as String;
-              final bool isDone = status == 'done';
-              final String category = course['category'] as String; 
               
-              final bool isFavorite = _favoriteIndices.contains(index);
-
-              return Card(
-                elevation: 2,
-                margin: const EdgeInsets.symmetric(vertical: 6),
-                child: InkWell(
-                  onTap: () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CourseDetailPage(course: course),
-                      ),
-                    );
-
-                    if (result == true && context.mounted) {
-                      setState(() {
-                        _favoriteIndices.add(index);
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Berhasil menandai materi: ${course['title']} sebagai favorit!'),
-                          backgroundColor: Colors.blue,
-                        ),
-                      );
-                    }
-                  },
-                  onLongPress: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Info: ${course['title']} (Kode: ${course['code']}) • Mahasiswa: $studentId'),
-                        backgroundColor: Colors.orange,
-                      ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: ListTile(
-                      leading: Icon(
-                        isDone ? Icons.check_circle : Icons.schedule,
-                        color: isDone ? Colors.green : Colors.orange,
-                      ),
-                      title: Text(course['title'] as String),
-                      subtitle: Text('Kode: ${course['code']} • Kategori: $category • SKS: ${course['credits']}'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(
-                              isFavorite ? Icons.favorite : Icons.favorite_border,
-                              color: isFavorite ? Colors.red : Colors.grey,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                if (isFavorite) {
-                                  _favoriteIndices.remove(index);
-                                } else {
-                                  _favoriteIndices.add(index);
-                                }
-                              });
-                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(isFavorite ? 'Dihapus dari Favorit' : 'Ditambahkan ke Favorit'),
-                                  duration: const Duration(seconds: 1),
-                                ),
-                              );
-                            },
-                          ),
-                          Text(
-                            status.toUpperCase(),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isDone ? Colors.green : Colors.orange,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
+              return CourseCardLocalState(course: course); 
             },
           ),
 
@@ -668,6 +584,79 @@ class ProfilePage extends StatelessWidget {
             subtitle: Text('Pendidikan Teknik Informatika'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class CourseCardLocalState extends StatefulWidget {
+  final Map<String, dynamic> course;
+  
+  const CourseCardLocalState({super.key, required this.course});
+
+  @override
+  State<CourseCardLocalState> createState() => _CourseCardLocalStateState();
+}
+
+class _CourseCardLocalStateState extends State<CourseCardLocalState> {
+  bool _isExpanded = false; 
+
+  @override
+  Widget build(BuildContext context) {
+    final String status = widget.course['status'] as String;
+    final bool isDone = status == 'done';
+    final String category = widget.course['category'] as String;
+
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      child: InkWell(
+        
+        onTap: () {
+          setState(() {
+            _isExpanded = !_isExpanded; 
+          });
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          child: Column(
+            children: [
+              ListTile(
+                leading: Icon(
+                  isDone ? Icons.check_circle : Icons.schedule,
+                  color: isDone ? Colors.green : Colors.orange,
+                ),
+                title: Text(widget.course['title'] as String),
+                subtitle: Text('Kode: ${widget.course['code']} • Kategori: $category'),
+                trailing: Icon(
+                  _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                ),
+              ),
+
+              if (_isExpanded)
+                Padding(
+                  padding: const EdgeInsets.only(left: 72.0, right: 16.0, bottom: 12.0),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Status: ${status.toUpperCase()}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDone ? Colors.green : Colors.orange,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        'SKS: ${widget.course['credits']}',
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
