@@ -660,7 +660,7 @@ class ProfilePage extends StatelessWidget {
           const ListTile(
             leading: Icon(Icons.email),
             title: Text('Email Mahasiswa'),
-            subtitle: Text('2415051055@student.undiksha.ac.id'),
+            subtitle: Text('pradiptha@student.undiksha.ac.id'),
           ),
           const ListTile(
             leading: Icon(Icons.school),
