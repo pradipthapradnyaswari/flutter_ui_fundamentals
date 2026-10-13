@@ -169,27 +169,41 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
 
-          ListView.builder(
-            padding: const EdgeInsets.all(16.0),
-            itemCount: courses.length,
-            itemBuilder: (context, index) {
-              final course = courses[index] as Map<String, dynamic>;
-              final isFav = _favoriteIndices.contains(index);
-              return CourseCardPropDrilling(
-                course: course,
-                isFavorite: isFav, 
-                onFavoriteToggle: () {
-                  setState(() {
-                    if (isFav) {
-                      _favoriteIndices.remove(index);
-                    } else {
-                      _favoriteIndices.add(index);
-                    }
-                  });
+        Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Text(
+                'Total Favorit: ${_favoriteIndices.length}',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16.0),
+                itemCount: courses.length,
+                itemBuilder: (context, index) {
+                  final course = courses[index] as Map<String, dynamic>;
+                  final isFav = _favoriteIndices.contains(index);
+                  
+                  return CourseCardPropDrilling(
+                    course: course,
+                    isFavorite: isFav, 
+                    onFavoriteToggle: () {
+                      setState(() {
+                        if (isFav) {
+                          _favoriteIndices.remove(index);
+                        } else {
+                          _favoriteIndices.add(index);
+                        }
+                      });
+                    },
+                  );
                 },
-              );
-            },
-          ),
+              ),
+            ),
+          ],
+        ),
 
           const ProfilePage(),
         ];
@@ -707,12 +721,10 @@ class _CourseCardPropDrillingState extends State<CourseCardPropDrilling> {
         title: Text(widget.course['title'] as String),
         subtitle: _isExpanded ? Text('SKS: ${widget.course['credits']}') : null,
         trailing: IconButton(
-          // Membaca nilai yang dilempar parent
           icon: Icon(
             widget.isFavorite ? Icons.favorite : Icons.favorite_border,
             color: widget.isFavorite ? Colors.red : Colors.grey,
           ),
-          // Memanggil fungsi milik parent
           onPressed: widget.onFavoriteToggle, 
         ),
       ),
