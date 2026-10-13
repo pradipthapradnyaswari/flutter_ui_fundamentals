@@ -174,8 +174,20 @@ class _DashboardPageState extends State<DashboardPage> {
             itemCount: courses.length,
             itemBuilder: (context, index) {
               final course = courses[index] as Map<String, dynamic>;
-              
-              return CourseCardLocalState(course: course); 
+              final isFav = _favoriteIndices.contains(index);
+              return CourseCardPropDrilling(
+                course: course,
+                isFavorite: isFav, 
+                onFavoriteToggle: () {
+                  setState(() {
+                    if (isFav) {
+                      _favoriteIndices.remove(index);
+                    } else {
+                      _favoriteIndices.add(index);
+                    }
+                  });
+                },
+              );
             },
           ),
 
@@ -656,6 +668,52 @@ class _CourseCardLocalStateState extends State<CourseCardLocalState> {
                 ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class CourseCardPropDrilling extends StatefulWidget {
+  final Map<String, dynamic> course;
+  final bool isFavorite; // Menerima state dari parent
+  final VoidCallback onFavoriteToggle; // Menerima aksi dari parent
+
+  const CourseCardPropDrilling({
+    super.key,
+    required this.course,
+    required this.isFavorite,
+    required this.onFavoriteToggle,
+  });
+
+  @override
+  State<CourseCardPropDrilling> createState() => _CourseCardPropDrillingState();
+}
+
+class _CourseCardPropDrillingState extends State<CourseCardPropDrilling> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      child: ListTile(
+        onTap: () {
+          setState(() {
+            _isExpanded = !_isExpanded;
+          });
+        },
+        title: Text(widget.course['title'] as String),
+        subtitle: _isExpanded ? Text('SKS: ${widget.course['credits']}') : null,
+        trailing: IconButton(
+          // Membaca nilai yang dilempar parent
+          icon: Icon(
+            widget.isFavorite ? Icons.favorite : Icons.favorite_border,
+            color: widget.isFavorite ? Colors.red : Colors.grey,
+          ),
+          // Memanggil fungsi milik parent
+          onPressed: widget.onFavoriteToggle, 
         ),
       ),
     );
