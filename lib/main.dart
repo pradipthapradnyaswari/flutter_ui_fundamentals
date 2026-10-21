@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
 import 'course_provider.dart';
 import 'models/course.dart';
+import 'services/course_service.dart';
 
 const String studentName = 'MD. PRADIPTHA PRADNYASWARI';
 const String studentId = '2415051055';
@@ -39,7 +40,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  late Future<Map<String, dynamic>> studentFuture;
+  late Future<List<Course>> coursesFuture;
   
   int _currentIndex = 0;
 
@@ -47,14 +48,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   void initState() {
     super.initState();
-    studentFuture = loadStudentData();
-  }
-
-  Future<Map<String, dynamic>> loadStudentData() async {
-    final jsonString = await rootBundle.loadString(
-      'assets/data/student_data.json',
-    );
-    return jsonDecode(jsonString) as Map<String, dynamic>;
+    coursesFuture = CourseService().loadCourses();
   }
 
   Widget buildSummaryCard(String title, String value, IconData icon) {
@@ -85,8 +79,8 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: studentFuture,
+    return FutureBuilder<List<Course>>(
+      future: coursesFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
@@ -107,12 +101,7 @@ class _DashboardPageState extends State<DashboardPage> {
           );
         }
 
-        final data = snapshot.data!;
-        final student = data['student'] as Map<String, dynamic>;
-        final coursesJson = data['courses'] as List<dynamic>;
-        final List<Course> courses = coursesJson
-            .map((json) => Course.fromJson(json as Map<String, dynamic>))
-            .toList();
+        final List<Course> courses = snapshot.data!;
 
         final int totalCourses = courses.length;
         final int completedCourses = courses.where((c) => c.status == 'done').length;
@@ -140,12 +129,12 @@ class _DashboardPageState extends State<DashboardPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                student['name'] as String,
+                                studentName,
                                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'NIM: ${student['nim']}',
+                                'NIM: $studentId',
                                 style: const TextStyle(fontSize: 14, color: Colors.grey),
                               ),
                             ],
