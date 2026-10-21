@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
 import 'course_provider.dart';
+import 'models/course.dart';
 
 const String studentName = 'MD. PRADIPTHA PRADNYASWARI';
 const String studentId = '2415051055';
@@ -108,11 +109,14 @@ class _DashboardPageState extends State<DashboardPage> {
 
         final data = snapshot.data!;
         final student = data['student'] as Map<String, dynamic>;
-        final courses = data['courses'] as List<dynamic>;
+        final coursesJson = data['courses'] as List<dynamic>;
+        final List<Course> courses = coursesJson
+            .map((json) => Course.fromJson(json as Map<String, dynamic>))
+            .toList();
 
         final int totalCourses = courses.length;
-        final int completedCourses = courses.where((c) => c['status'] == 'done').length;
-        final int totalCredits = courses.fold(0, (sum, item) => sum + (item['credits'] as int));
+        final int completedCourses = courses.where((c) => c.status == 'done').length;
+        final int totalCredits = courses.fold(0, (sum, item) => sum + item.credits);
 
         final List<Widget> pages = [
           SingleChildScrollView(
@@ -189,7 +193,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   padding: const EdgeInsets.all(16.0),
                   itemCount: courses.length,
                   itemBuilder: (context, index) {
-                    final course = courses[index] as Map<String, dynamic>;
+                    final Course course = courses[index];
                     
                     final isFav = context.watch<CourseProvider>().isFavorite(index); 
                     
@@ -345,17 +349,17 @@ class ExpandedLayout extends StatelessWidget {
 }
 
 class CourseDetailPage extends StatelessWidget {
-  final Map<String, dynamic> course;
+  final Course course;
 
   const CourseDetailPage({super.key, required this.course});
 
   @override
   Widget build(BuildContext context) {
-    final String title = course['title'] as String;
-    final String code = course['code'] as String;
-    final String category = course['category'] as String;
-    final int credits = course['credits'] as int;
-    final String status = course['status'] as String;
+    final String title = course.title;
+    final String code = course.code;
+    final String category = course.category;
+    final int credits = course.credits;
+    final String status = course.status;
 
     return Scaffold(
       appBar: AppBar(
@@ -690,9 +694,9 @@ class _CourseCardLocalStateState extends State<CourseCardLocalState> {
 }
 
 class CourseCardPropDrilling extends StatefulWidget {
-  final Map<String, dynamic> course;
-  final bool isFavorite; // Menerima state dari parent
-  final VoidCallback onFavoriteToggle; // Menerima aksi dari parent
+  final Course course;
+  final bool isFavorite; 
+  final VoidCallback onFavoriteToggle; 
 
   const CourseCardPropDrilling({
     super.key,
@@ -719,8 +723,8 @@ class _CourseCardPropDrillingState extends State<CourseCardPropDrilling> {
             _isExpanded = !_isExpanded;
           });
         },
-        title: Text(widget.course['title'] as String),
-        subtitle: _isExpanded ? Text('SKS: ${widget.course['credits']}') : null,
+        title: Text(widget.course.title),
+        subtitle: _isExpanded ? Text('SKS: ${widget.course.credits}') : null,
         trailing: IconButton(
           icon: Icon(
             widget.isFavorite ? Icons.favorite : Icons.favorite_border,
