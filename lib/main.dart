@@ -177,11 +177,11 @@ class _DashboardPageState extends State<DashboardPage> {
 
           Column(
             children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 16.0),
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0),
                 child: Text(
-                  'Total Favorit: ...',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.teal),
+                  'Total Favorit: ${context.watch<CourseProvider>().favorites.length}',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.teal),
                 ),
               ),
               Expanded(
@@ -190,12 +190,14 @@ class _DashboardPageState extends State<DashboardPage> {
                   itemCount: courses.length,
                   itemBuilder: (context, index) {
                     final course = courses[index] as Map<String, dynamic>;
-                    final isFav = false; 
+                    
+                    final isFav = context.watch<CourseProvider>().isFavorite(index); 
                     
                     return CourseCardPropDrilling(
                       course: course,
                       isFavorite: isFav, 
                       onFavoriteToggle: () {
+                        context.read<CourseProvider>().toggleFavorite(index);
                       },
                     );
                   },
