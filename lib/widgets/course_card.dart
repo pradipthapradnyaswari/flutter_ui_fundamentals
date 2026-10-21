@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/course.dart';
+import '../screens/course_detail_screen.dart'; 
 
-class CourseCardPropDrilling extends StatefulWidget {
+class CourseCardPropDrilling extends StatelessWidget {
   final Course course;
   final bool isFavorite; 
   final VoidCallback onFavoriteToggle; 
@@ -14,31 +15,27 @@ class CourseCardPropDrilling extends StatefulWidget {
   });
 
   @override
-  State<CourseCardPropDrilling> createState() => _CourseCardPropDrillingState();
-}
-
-class _CourseCardPropDrillingState extends State<CourseCardPropDrilling> {
-  bool _isExpanded = false;
-
-  @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 6),
       child: ListTile(
         onTap: () {
-          setState(() {
-            _isExpanded = !_isExpanded;
-          });
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CourseDetailScreen(course: course),
+            ),
+          );
         },
-        title: Text(widget.course.title),
-        subtitle: _isExpanded ? Text('SKS: ${widget.course.credits}') : null,
+        title: Text(course.title),
+        subtitle: Text('SKS: ${course.credits}'), 
         trailing: IconButton(
           icon: Icon(
-            widget.isFavorite ? Icons.favorite : Icons.favorite_border,
-            color: widget.isFavorite ? Colors.red : Colors.grey,
+            isFavorite ? Icons.favorite : Icons.favorite_border,
+            color: isFavorite ? Colors.red : Colors.grey,
           ),
-          onPressed: widget.onFavoriteToggle, 
+          onPressed: onFavoriteToggle, 
         ),
       ),
     );

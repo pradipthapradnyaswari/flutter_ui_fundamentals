@@ -11,6 +11,7 @@ import 'widgets/course_card.dart';
 import 'layouts/compact_layout.dart';
 import 'layouts/medium_layout.dart';
 import 'layouts/expanded_layout.dart';
+import 'screens/favorites_screen.dart';
 
 const String studentName = 'MD. PRADIPTHA PRADNYASWARI';
 const String studentId = '2415051055';
@@ -107,6 +108,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final int totalCredits = courses.fold(0, (sum, item) => sum + item.credits);
 
     final List<Widget> pages = [
+      // Index 0: Home
       SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -143,16 +145,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                buildSummaryCard('Total Topik', '$totalCourses Topik', Icons.book),
-                const SizedBox(width: 8),
-                buildSummaryCard('Selesai', '$completedCourses Selesai', Icons.check_circle),
-                const SizedBox(width: 8),
-                buildSummaryCard('Total SKS', '$totalCredits SKS', Icons.credit_card),
-              ],
-            ),
             const SizedBox(height: 24),
             const Text(
               'Selamat Datang di Learning Dashboard!',
@@ -163,9 +155,18 @@ class _DashboardPageState extends State<DashboardPage> {
               'Mahasiswa Aktif: $studentId\n$studentName',
               style: const TextStyle(fontSize: 14, color: Colors.blue, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 16),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth < 600) return const CompactLayout();
+                else if (constraints.maxWidth < 900) return const MediumLayout();
+                else return const ExpandedLayout();
+              },
+            ),
           ],
         ),
       ),
+
       Column(
         children: [
           Padding(
@@ -182,29 +183,35 @@ class _DashboardPageState extends State<DashboardPage> {
               itemBuilder: (context, index) {
                 final Course course = courses[index];
                 final isFav = context.watch<CourseProvider>().isFavorite(course.code); 
-                
                 return CourseCardPropDrilling(
                   course: course,
                   isFavorite: isFav, 
-                  onFavoriteToggle: () {
-                    context.read<CourseProvider>().toggleFavorite(course.code);
-                  },
+                  onFavoriteToggle: () => context.read<CourseProvider>().toggleFavorite(course.code),
                 );
               },
             ),
           ),
         ],
       ),
+
+      const FavoritesScreen(),
+
       const ProfilePage(),
     ];
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final bool isExpanded = constraints.maxWidth >= 840;
+        
+        // Atur judul AppBar sesuai tab yang aktif
+        String appBarTitle = 'Home';
+        if (_currentIndex == 1) appBarTitle = 'Courses';
+        if (_currentIndex == 2) appBarTitle = 'Favorites';
+        if (_currentIndex == 3) appBarTitle = 'Profile';
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(_currentIndex == 0 ? 'Home' : _currentIndex == 1 ? 'Courses' : 'Profile'),
+            title: Text(appBarTitle),
             backgroundColor: Colors.blue,
             foregroundColor: Colors.white,
             actions: [
@@ -225,25 +232,13 @@ class _DashboardPageState extends State<DashboardPage> {
               if (isExpanded)
                 NavigationRail(
                   selectedIndex: _currentIndex,
-                  onDestinationSelected: (index) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
+                  onDestinationSelected: (index) => setState(() => _currentIndex = index),
                   labelType: NavigationRailLabelType.all,
                   destinations: const [
-                    NavigationRailDestination(
-                      icon: Icon(Icons.home),
-                      label: Text('Home'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.school),
-                      label: Text('Courses'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.person),
-                      label: Text('Profile'),
-                    ),
+                    NavigationRailDestination(icon: Icon(Icons.home), label: Text('Home')),
+                    NavigationRailDestination(icon: Icon(Icons.school), label: Text('Courses')),
+                    NavigationRailDestination(icon: Icon(Icons.favorite), label: Text('Favorites')),
+                    NavigationRailDestination(icon: Icon(Icons.person), label: Text('Profile')),
                   ],
                 ),
               if (isExpanded) const VerticalDivider(width: 1, thickness: 1),
@@ -254,24 +249,12 @@ class _DashboardPageState extends State<DashboardPage> {
               ? null
               : NavigationBar(
                   selectedIndex: _currentIndex,
-                  onDestinationSelected: (index) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
+                  onDestinationSelected: (index) => setState(() => _currentIndex = index),
                   destinations: const [
-                    NavigationDestination(
-                      icon: Icon(Icons.home),
-                      label: 'Home',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.school),
-                      label: 'Courses',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.person),
-                      label: 'Profile',
-                    ),
+                    NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+                    NavigationDestination(icon: Icon(Icons.school), label: 'Courses'),
+                    NavigationDestination(icon: Icon(Icons.favorite), label: 'Favorites'), // <-- Tab Baru!
+                    NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
                   ],
                 ),
         );
