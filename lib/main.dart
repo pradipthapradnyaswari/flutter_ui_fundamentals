@@ -1,12 +1,19 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:provider/provider.dart';
+import 'course_provider.dart';
 
 const String studentName = 'MD. PRADIPTHA PRADNYASWARI';
 const String studentId = '2415051055';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => CourseProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -35,13 +42,7 @@ class _DashboardPageState extends State<DashboardPage> {
   
   int _currentIndex = 0;
 
-  final ValueNotifier<Set<int>> _favoriteIndicesNotifier = ValueNotifier<Set<int>>({});
-
   @override
-  void dispose() {
-    _favoriteIndicesNotifier.dispose();
-    super.dispose();
-  }
 
   void initState() {
     super.initState();
@@ -174,46 +175,34 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
 
-        ValueListenableBuilder<Set<int>>(
-          valueListenable: _favoriteIndicesNotifier,
-          builder: (context, favoriteSet, child) {
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: Text(
-                    'Total Favorit: ${favoriteSet.length}',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.purple),
-                  ),
+          Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(top: 16.0),
+                child: Text(
+                  'Total Favorit: ...',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.teal),
                 ),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16.0),
-                    itemCount: courses.length,
-                    itemBuilder: (context, index) {
-                      final course = courses[index] as Map<String, dynamic>;
-                      final isFav = favoriteSet.contains(index);
-                      
-                      return CourseCardPropDrilling(
-                        course: course,
-                        isFavorite: isFav, 
-                        onFavoriteToggle: () {
-                          final newSet = Set<int>.from(favoriteSet);
-                          if (isFav) {
-                            newSet.remove(index);
-                          } else {
-                            newSet.add(index);
-                          }
-                          _favoriteIndicesNotifier.value = newSet;
-                        },
-                      );
-                    },
-                  ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  itemCount: courses.length,
+                  itemBuilder: (context, index) {
+                    final course = courses[index] as Map<String, dynamic>;
+                    final isFav = false; 
+                    
+                    return CourseCardPropDrilling(
+                      course: course,
+                      isFavorite: isFav, 
+                      onFavoriteToggle: () {
+                      },
+                    );
+                  },
                 ),
-              ],
-            );
-          },
-        ),
+              ),
+            ],
+          ),
 
           const ProfilePage(),
         ];
