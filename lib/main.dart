@@ -226,7 +226,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           body: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            
+
             children: [
               if (isExpanded)
                 NavigationRail(
