@@ -1,17 +1,15 @@
-# flutter_ui_fundamentals
+# Course Explorer v2 - Praktikum Mobile Programming
 
-A new Flutter project.
+**Nama:** MD. PRADIPTHA PRADNYASWARI
+**NIM:** 2415051055
 
-## Getting Started
+## Audit Arsitektur & Tanggung Jawab Lapisan (Dependency Direction)
+Aplikasi ini telah menerapkan *Separation of Concerns* dengan arah dependensi yang benar: **Screen -> Provider -> Repository -> Service**. 
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Berikut adalah tanggung jawab dari masing-masing folder (layer):
+1. **`models/`**: Bertanggung jawab mendefinisikan struktur data (blueprint `Course`) dan melakukan *parsing* dari JSON ke Object Dart (fungsi `fromJson`).
+2. **`services/`**: Lapisan paling bawah (*Data Source*). Bertanggung jawab berinteraksi langsung dengan sumber data mentah, contohnya membaca file JSON lokal menggunakan `rootBundle` dan memecahnya menggunakan `jsonDecode`. Layer ini tidak boleh tahu menahu soal UI (Widget).
+3. **`repositories/`**: Berperan sebagai jembatan/abstraksi yang menghubungkan `Provider` dan `Service`. Jika nanti sumber data berubah dari JSON ke Database/API, kita hanya mengubah layer Service/Repository tanpa merusak Provider.
+4. **`providers/`**: Lapisan pengelola *State* (State Management). Bertanggung jawab menampung data (*courses*, *favorites*), status antarmuka (*isLoading*, *error*), dan membroadcast perubahan data ke seluruh layar menggunakan `notifyListeners()`. Provider murni mengolah logika bisnis dan dilarang keras menyimpan *BuildContext* sebagai properti.
+5. **`screens/`**: Lapisan Antarmuka (*View*). Hanya bertugas menampilkan UI (layar Home, Favorites, Profile, dsb). Tidak boleh melakukan pemrosesan data mentah. Hanya bertugas mengonsumsi data dari Provider menggunakan `context.watch` atau merespons interaksi dengan `context.read`.
+6. **`widgets/` & `layouts/`**: Berisi potongan-potongan komponen UI yang bisa dipakai ulang (seperti *Card* mata kuliah) dan logika pengaturan tata letak responsif (Compact, Medium, Expanded).
