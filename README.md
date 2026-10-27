@@ -13,3 +13,9 @@ Berikut adalah tanggung jawab dari masing-masing folder (layer):
 4. **`providers/`**: Lapisan pengelola *State* (State Management). Bertanggung jawab menampung data (*courses*, *favorites*), status antarmuka (*isLoading*, *error*), dan membroadcast perubahan data ke seluruh layar menggunakan `notifyListeners()`. Provider murni mengolah logika bisnis dan dilarang keras menyimpan *BuildContext* sebagai properti.
 5. **`screens/`**: Lapisan Antarmuka (*View*). Hanya bertugas menampilkan UI (layar Home, Favorites, Profile, dsb). Tidak boleh melakukan pemrosesan data mentah. Hanya bertugas mengonsumsi data dari Provider menggunakan `context.watch` atau merespons interaksi dengan `context.read`.
 6. **`widgets/` & `layouts/`**: Berisi potongan-potongan komponen UI yang bisa dipakai ulang (seperti *Card* mata kuliah) dan logika pengaturan tata letak responsif (Compact, Medium, Expanded).
+
+## REST API Endpoint
+- **URL Endpoint**: `https://my-json-server.typicode.com/pradipthapradnyaswari/flutter_ui_fundamentals/courses`
+- **Method**: GET
+- **Status Code**: 200 OK
+- **Resource JSON**: `id`, `code`, `title`, `credits`, `status`

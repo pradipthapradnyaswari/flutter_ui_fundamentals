@@ -1,0 +1,25 @@
+{
+  "courses": [
+    {
+      "id": 1,
+      "code": "MOB01",
+      "title": "Git & GitHub",
+      "credits": 2,
+      "status": "done"
+    },
+    {
+      "id": 2,
+      "code": "MOB02",
+      "title": "Dart Fundamentals",
+      "credits": 2,
+      "status": "done"
+    },
+    {
+      "id": 3,
+      "code": "MOB03",
+      "title": "Flutter UI",
+      "credits": 3,
+      "status": "active"
+    }
+  ]
+}
