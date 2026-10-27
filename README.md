@@ -15,7 +15,7 @@ Berikut adalah tanggung jawab dari masing-masing folder (layer):
 6. **`widgets/` & `layouts/`**: Berisi potongan-potongan komponen UI yang bisa dipakai ulang (seperti *Card* mata kuliah) dan logika pengaturan tata letak responsif (Compact, Medium, Expanded).
 
 ## REST API Endpoint
-- **URL Endpoint**: `https://my-json-server.typicode.com/pradipthapradnyaswari/flutter_ui_fundamentals/courses`
+- **URL Endpoint**: `https://jsonplaceholder.typicode.com/posts`
 - **Method**: GET
 - **Status Code**: 200 OK
 - **Resource JSON**: `id`, `code`, `title`, `credits`, `status`

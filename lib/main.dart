@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -49,9 +51,26 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _currentIndex = 0;
 
+  final String apiUrl = 'https://my-json-server.typicode.com/pradipthapradnyaswari/flutter_ui_fundamentals/courses';
+
+  Future<void> testFetchCourses() async {
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        debugPrint('GET BERHASIL! Jumlah data course: ${data.length}');
+      } else {
+        debugPrint('HTTP Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Terjadi kesalahan: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    testFetchCourses();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CourseProvider>().loadCourses();
     });
