@@ -19,7 +19,7 @@ const String studentId = '2415051055';
 void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (context) => CourseProvider(CourseRepository(CourseService())), // <--- Tambahkan CourseService() di dalam sini
+      create: (context) => CourseProvider(CourseRepository(CourseService())),
       child: const MyApp(),
     ),
   );
@@ -47,7 +47,6 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  late Future<List<Course>> coursesFuture;
   int _currentIndex = 0;
 
   @override
@@ -108,7 +107,6 @@ class _DashboardPageState extends State<DashboardPage> {
     final int totalCredits = courses.fold(0, (sum, item) => sum + item.credits);
 
     final List<Widget> pages = [
-      // Index 0: Home
       SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -203,7 +201,6 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (context, constraints) {
         final bool isExpanded = constraints.maxWidth >= 840;
         
-        // Atur judul AppBar sesuai tab yang aktif
         String appBarTitle = 'Home';
         if (_currentIndex == 1) appBarTitle = 'Courses';
         if (_currentIndex == 2) appBarTitle = 'Favorites';
@@ -228,6 +225,8 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ),
           body: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            
             children: [
               if (isExpanded)
                 NavigationRail(
@@ -253,7 +252,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   destinations: const [
                     NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
                     NavigationDestination(icon: Icon(Icons.school), label: 'Courses'),
-                    NavigationDestination(icon: Icon(Icons.favorite), label: 'Favorites'), // <-- Tab Baru!
+                    NavigationDestination(icon: Icon(Icons.favorite), label: 'Favorites'), 
                     NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
                   ],
                 ),
