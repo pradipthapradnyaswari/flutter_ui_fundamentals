@@ -1,26 +1,32 @@
 class Course {
+  final int? id;
   final String code;
   final String title;
-  final String category; // Tambahan agar UI sebelumnya tidak error
   final int credits;
   final String status;
 
-  Course({
+  const Course({
+    this.id,
     required this.code,
     required this.title,
-    required this.category,
     required this.credits,
-    required this.status,
+    this.status = 'planned',
   });
 
-  // Factory untuk mem-parsing JSON menjadi Object Course
   factory Course.fromJson(Map<String, dynamic> json) {
     return Course(
-      code: json['code'] as String,
+      id: json['id'] as int?,
+      code: json['code'] as String? ?? 'MOB-${json['id']}',
       title: json['title'] as String,
-      category: json['category'] as String,
-      credits: json['credits'] as int,
-      status: json['status'] as String,
+      credits: json['credits'] as int? ?? json['userId'] as int? ?? 2,
+      status: (json['status'] as String?) ?? 'planned',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'code': code,
+    'title': title,
+    'credits': credits,
+    'status': status,
+  };
 }

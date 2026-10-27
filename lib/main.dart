@@ -51,14 +51,27 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _currentIndex = 0;
 
-  final String apiUrl = 'https://my-json-server.typicode.com/pradipthapradnyaswari/flutter_ui_fundamentals/courses';
+  final String apiUrl = 'https://jsonplaceholder.typicode.com/posts';
 
   Future<void> testFetchCourses() async {
     try {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        debugPrint('GET BERHASIL! Jumlah data course: ${data.length}');
+        
+        final List<Course> fetchedCourses = data.map((json) => Course.fromJson(json)).toList();
+        debugPrint('GET & PARSING BERHASIL! Jumlah objek Course: ${fetchedCourses.length}');
+        debugPrint('Data 1: ${fetchedCourses[0].code} | ${fetchedCourses[0].title} | ${fetchedCourses[0].status}');
+        debugPrint('Data 2: ${fetchedCourses[1].code} | ${fetchedCourses[1].title} | ${fetchedCourses[1].status}');
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Berhasil mem-parsing ${fetchedCourses.length} Course dari API!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       } else {
         debugPrint('HTTP Error: ${response.statusCode}');
       }
