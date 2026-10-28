@@ -14,6 +14,7 @@ import 'layouts/compact_layout.dart';
 import 'layouts/medium_layout.dart';
 import 'layouts/expanded_layout.dart';
 import 'screens/favorites_screen.dart';
+import 'widgets/error_view.dart';
 
 const String studentName = 'MD. PRADIPTHA PRADNYASWARI';
 const String studentId = '2415051055';
@@ -101,7 +102,17 @@ class _DashboardPageState extends State<DashboardPage> {
     if (courseProvider.error != null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Learning Dashboard')),
-        body: Center(child: Text('Gagal memuat data: ${courseProvider.error}')),
+        body: ErrorView(
+          message: courseProvider.error!,
+          onRetry: () => courseProvider.loadCourses(),
+        ),
+      );
+    }
+
+    if (courseProvider.courses.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Learning Dashboard')),
+        body: const Center(child: Text('Data course belum tersedia', style: TextStyle(fontSize: 18))),
       );
     }
 
