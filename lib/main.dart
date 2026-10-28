@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,6 +5,7 @@ import 'models/course.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
 import 'services/course_api_service.dart';
+
 import 'screens/profile_screen.dart';
 import 'screens/feedback_screen.dart';
 import 'widgets/course_card.dart';
@@ -21,11 +20,12 @@ const String studentName = 'MD. PRADIPTHA PRADNYASWARI';
 const String studentId = '2415051055';
 
 void main() {
+  final String apiBaseUrl = 'https://jsonplaceholder.typicode.com';
+  final repository = CourseRepository(CourseApiService(apiBaseUrl));
+
   runApp(
     ChangeNotifierProvider(
-      create: (context) => CourseProvider(
-        CourseRepository(CourseApiService('https://jsonplaceholder.typicode.com'))
-      ),
+      create: (context) => CourseProvider(repository),
       child: const MyApp(),
     ),
   );
@@ -63,32 +63,6 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
-  Widget buildSummaryCard(String title, String value, IconData icon) {
-    return Expanded(
-      child: Card(
-        elevation: 2,
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            children: [
-              Icon(icon, color: Colors.blue, size: 26),
-              const SizedBox(height: 6),
-              Text(
-                value,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final courseProvider = context.watch<CourseProvider>();
@@ -118,9 +92,6 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     final courses = courseProvider.courses;
-    final int totalCourses = courses.length;
-    final int completedCourses = courses.where((c) => c.status == 'done').length;
-    final int totalCredits = courses.fold(0, (sum, item) => sum + item.credits);
 
     final List<Widget> pages = [
       SingleChildScrollView(
@@ -143,14 +114,14 @@ class _DashboardPageState extends State<DashboardPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             studentName,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
-                          Text(
+                          const Text(
                             'NIM: $studentId',
-                            style: const TextStyle(fontSize: 14, color: Colors.grey),
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
                           ),
                         ],
                       ),
@@ -165,22 +136,25 @@ class _DashboardPageState extends State<DashboardPage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'Mahasiswa Aktif: $studentId\n$studentName',
-              style: const TextStyle(fontSize: 14, color: Colors.blue, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 14, color: Colors.blue, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             LayoutBuilder(
               builder: (context, constraints) {
-                if (constraints.maxWidth < 600) return const CompactLayout();
-                else if (constraints.maxWidth < 900) return const MediumLayout();
-                else return const ExpandedLayout();
+                if (constraints.maxWidth < 600) {
+                  return const CompactLayout();
+                } else if (constraints.maxWidth < 900) {
+                  return const MediumLayout();
+                } else {
+                  return const ExpandedLayout();
+                }
               },
             ),
           ],
         ),
       ),
-
       Column(
         children: [
           Padding(
@@ -207,9 +181,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ],
       ),
-
       const FavoritesScreen(),
-
       const ProfilePage(),
     ];
 
@@ -242,7 +214,6 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           body: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-
             children: [
               if (isExpanded)
                 NavigationRail(
@@ -260,7 +231,6 @@ class _DashboardPageState extends State<DashboardPage> {
               Expanded(child: pages[_currentIndex]),
             ],
           ),
-
           floatingActionButton: isExpanded ? null : FloatingActionButton(
             onPressed: () {
               Navigator.push(
@@ -271,7 +241,6 @@ class _DashboardPageState extends State<DashboardPage> {
             backgroundColor: Colors.blue,
             child: const Icon(Icons.add, color: Colors.white),
           ),
-          
           bottomNavigationBar: isExpanded
               ? null
               : NavigationBar(

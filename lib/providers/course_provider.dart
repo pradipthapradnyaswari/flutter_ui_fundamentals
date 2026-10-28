@@ -43,7 +43,8 @@ class CourseProvider extends ChangeNotifier {
 
   Future<bool> addCourse(Course course) async {
     try {
-      await repository.addCourse(course);
+      await repository.createCourse(course);
+      
       await loadCourses();
       return true;
     } catch (e) {
