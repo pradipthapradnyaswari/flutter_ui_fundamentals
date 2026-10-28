@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'models/course.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
 import 'services/course_api_service.dart';
+import 'services/course_data_source.dart';
 
 import 'screens/profile_screen.dart';
 import 'screens/feedback_screen.dart';
@@ -19,13 +21,24 @@ import 'screens/add_course_screen.dart';
 const String studentName = 'MD. PRADIPTHA PRADNYASWARI';
 const String studentId = '2415051055';
 
-void main() {
-  final String apiBaseUrl = 'https://jsonplaceholder.typicode.com';
-  final repository = CourseRepository(CourseApiService(apiBaseUrl));
+const String supabaseUrl = 'https://bsdruahkljuzencndnhq.supabase.co';
+const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzZHJ1YWhrbGp1emVuY25kbmhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMDc0NTgsImV4cCI6MjEwODc4MzQ1OH0.QceZacD92EQtq6Z56tKkZyt4qxPKYkx5TVtyjVqkOKc';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
+  );
+
+  const String apiBaseUrl = 'https://jsonplaceholder.typicode.com';
+  final CourseDataSource dataSource = CourseApiService(apiBaseUrl);
+  final repository = CourseRepository(dataSource);
 
   runApp(
     ChangeNotifierProvider(
-      create: (context) => CourseProvider(repository),
+      create: (_) => CourseProvider(repository)..loadCourses(),
       child: const MyApp(),
     ),
   );
