@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'models/course.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
-import 'services/course_service.dart';
+import 'services/course_api_service.dart';
 import 'screens/profile_screen.dart';
 import 'screens/feedback_screen.dart';
 import 'widgets/course_card.dart';
@@ -21,7 +21,9 @@ const String studentId = '2415051055';
 void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (context) => CourseProvider(CourseRepository(CourseService())),
+      create: (context) => CourseProvider(
+        CourseRepository(CourseApiService('https://jsonplaceholder.typicode.com'))
+      ),
       child: const MyApp(),
     ),
   );
@@ -51,39 +53,9 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _currentIndex = 0;
 
-  final String apiUrl = 'https://jsonplaceholder.typicode.com/posts';
-
-  Future<void> testFetchCourses() async {
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        
-        final List<Course> fetchedCourses = data.map((json) => Course.fromJson(json)).toList();
-        debugPrint('GET & PARSING BERHASIL! Jumlah objek Course: ${fetchedCourses.length}');
-        debugPrint('Data 1: ${fetchedCourses[0].code} | ${fetchedCourses[0].title} | ${fetchedCourses[0].status}');
-        debugPrint('Data 2: ${fetchedCourses[1].code} | ${fetchedCourses[1].title} | ${fetchedCourses[1].status}');
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Berhasil mem-parsing ${fetchedCourses.length} Course dari API!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } else {
-        debugPrint('HTTP Error: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Terjadi kesalahan: $e');
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    testFetchCourses();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CourseProvider>().loadCourses();
     });
