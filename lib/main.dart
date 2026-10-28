@@ -15,6 +15,7 @@ import 'layouts/medium_layout.dart';
 import 'layouts/expanded_layout.dart';
 import 'screens/favorites_screen.dart';
 import 'widgets/error_view.dart';
+import 'screens/add_course_screen.dart';
 
 const String studentName = 'MD. PRADIPTHA PRADNYASWARI';
 const String studentId = '2415051055';
@@ -259,6 +260,18 @@ class _DashboardPageState extends State<DashboardPage> {
               Expanded(child: pages[_currentIndex]),
             ],
           ),
+
+          floatingActionButton: isExpanded ? null : FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddCourseScreen()),
+              );
+            },
+            backgroundColor: Colors.blue,
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
+          
           bottomNavigationBar: isExpanded
               ? null
               : NavigationBar(

@@ -40,4 +40,16 @@ class CourseProvider extends ChangeNotifier {
   bool isFavorite(String courseCode) {
     return favorites.contains(courseCode);
   }
+
+  Future<bool> addCourse(Course course) async {
+    try {
+      await repository.addCourse(course);
+      await loadCourses();
+      return true;
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
 }
