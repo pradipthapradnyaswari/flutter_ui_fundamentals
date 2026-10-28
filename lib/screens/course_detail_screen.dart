@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/course.dart';
 import '../providers/course_provider.dart';
+import 'edit_course_screen.dart';
 import '../main.dart' show studentId, studentName;
 
 class CourseDetailScreen extends StatelessWidget {
@@ -18,6 +19,19 @@ class CourseDetailScreen extends StatelessWidget {
         title: Text(course.title),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditCourseScreen(course: course),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

@@ -52,4 +52,16 @@ class CourseProvider extends ChangeNotifier {
       return false;
     }
   }
+
+  Future<bool> updateCourse(int id, Course course) async {
+    try {
+      await repository.updateCourse(id, course);
+      await loadCourses(); // Refresh data
+      return true;
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
 }
