@@ -64,4 +64,21 @@ class CourseProvider extends ChangeNotifier {
       return false;
     }
   }
+
+  Future<bool> deleteCourse(int id, String courseCode) async {
+    try {
+      await repository.deleteCourse(id);
+      
+      if (favorites.contains(courseCode)) {
+        favorites.remove(courseCode);
+      }
+      
+      await loadCourses(); 
+      return true;
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
 }
