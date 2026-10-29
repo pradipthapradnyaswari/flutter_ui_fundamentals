@@ -57,7 +57,7 @@ class CourseProvider extends ChangeNotifier {
   Future<bool> updateCourse(int id, Course course) async {
     try {
       await repository.updateCourse(id, course);
-      await loadCourses(); // Refresh data
+      await loadCourses();
       return true;
     } catch (e) {
       error = e.toString();

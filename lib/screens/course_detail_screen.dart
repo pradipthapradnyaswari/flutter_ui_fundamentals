@@ -33,7 +33,6 @@ class CourseDetailScreen extends StatelessWidget {
     );
 
     if (confirm != true) return;
-
     if (!context.mounted) return; 
 
     final provider = context.read<CourseProvider>();
@@ -55,20 +54,27 @@ class CourseDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isFavorite = context.watch<CourseProvider>().isFavorite(course.code);
+    final provider = context.watch<CourseProvider>();
+
+    final updatedCourse = provider.courses.firstWhere(
+      (c) => c.code == course.code, 
+      orElse: () => course, 
+    );
+    
+    final isFavorite = provider.isFavorite(updatedCourse.code);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(course.title),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        title: Text(updatedCourse.title), 
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => EditCourseScreen(course: course)),
+                MaterialPageRoute(
+                  builder: (context) => EditCourseScreen(course: updatedCourse), 
+                ),
               );
             },
           ),
@@ -83,25 +89,26 @@ class CourseDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               '$studentId\n$studentName',
-              style: const TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
+            
             Text(
-              course.title,
+              updatedCourse.title,
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            Text('Kode Mata Kuliah: ${course.code}', style: const TextStyle(fontSize: 16)),
+            Text('Kode Mata Kuliah: ${updatedCourse.code}', style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
-            Text('Jumlah SKS: ${course.credits}', style: const TextStyle(fontSize: 16)),
+            Text('Jumlah SKS: ${updatedCourse.credits}', style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
-            Text('Status: ${course.status.toUpperCase()}', 
+            Text('Status: ${updatedCourse.status.toUpperCase()}', 
               style: TextStyle(
                 fontSize: 16, 
                 fontWeight: FontWeight.bold,
-                color: course.status == 'done' ? Colors.green : Colors.orange,
+                color: updatedCourse.status == 'done' ? Colors.green : Colors.orange,
               ),
             ),
             const Divider(height: 32),
@@ -115,7 +122,7 @@ class CourseDetailScreen extends StatelessWidget {
                 icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
                 label: Text(isFavorite ? 'Hapus dari Favorit' : 'Tandai sebagai Favorit'),
                 onPressed: () {
-                  context.read<CourseProvider>().toggleFavorite(course.code);
+                  context.read<CourseProvider>().toggleFavorite(updatedCourse.code);
                 },
               ),
             ),
