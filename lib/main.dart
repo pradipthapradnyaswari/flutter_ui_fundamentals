@@ -7,6 +7,7 @@ import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
 import 'services/course_api_service.dart';
 import 'services/course_data_source.dart';
+import 'services/course_supabase_service.dart';
 
 import 'screens/profile_screen.dart';
 import 'screens/feedback_screen.dart';
@@ -33,7 +34,7 @@ Future<void> main() async {
   );
 
   const String apiBaseUrl = 'https://jsonplaceholder.typicode.com';
-  final CourseDataSource dataSource = CourseApiService(apiBaseUrl);
+  final CourseDataSource dataSource = CourseSupabaseService();
   final repository = CourseRepository(dataSource);
 
   runApp(
@@ -177,6 +178,20 @@ class _DashboardPageState extends State<DashboardPage> {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.teal),
             ),
           ),
+
+          const Padding(
+            padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+            child: Text(
+              '$studentId\n$studentName',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(16.0),
