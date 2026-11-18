@@ -5,10 +5,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'models/course.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
-import 'services/course_api_service.dart';
 import 'services/course_data_source.dart';
 import 'services/course_supabase_service.dart';
 
+import 'screens/auth_gate.dart';
 import 'screens/profile_screen.dart';
 import 'screens/feedback_screen.dart';
 import 'widgets/course_card.dart';
@@ -38,12 +38,13 @@ Future<void> main() async {
   final repository = CourseRepository(dataSource);
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => CourseProvider(repository)..loadCourses(),
-      child: const MyApp(),
-    ),
-  );
+  ChangeNotifierProvider(
+    create: (_) => CourseProvider(repository),
+    child: const MyApp(),
+  ),
+);
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -54,10 +55,13 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Learning Dashboard',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const DashboardPage(),
+      home: AuthGate(
+        authenticatedBuilder: (_) => const DashboardPage(),
+      ),
     );
   }
 }
+
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
