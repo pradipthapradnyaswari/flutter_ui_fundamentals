@@ -17,10 +17,20 @@ class AuthService {
   Future<AuthResponse> register({
     required String email,
     required String password,
+    String name = '',
+    String role = 'student',
+    String? identityType,
+    String? identityNumber,
   }) {
     return _client.auth.signUp(
       email: email,
       password: password,
+      data: {
+        'name': name,
+        'role': role,
+        'identity_type': identityType,
+        'identity_number': identityNumber,
+      },
     );
   }
 

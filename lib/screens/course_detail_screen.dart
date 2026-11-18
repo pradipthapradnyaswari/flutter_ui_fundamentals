@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/course.dart';
@@ -10,21 +11,42 @@ class CourseDetailScreen extends StatelessWidget {
 
   const CourseDetailScreen({super.key, required this.course});
 
+  static const Color _primaryBlue = Color(0xFF2563EB);
+  static const Color _darkBlue = Color(0xFF1E40AF);
+
+  Widget _buildStudentLabel() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Text(
+        '$studentName - $studentId',
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey,
+        ),
+      ),
+    );
+  }
+
   Future<void> _confirmDelete(BuildContext context) async {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Konfirmasi Hapus'),
-          content: Text('Apakah Anda yakin ingin menghapus course "${course.title}"?'),
+          content: Text(
+            'Apakah Anda yakin ingin menghapus course "${course.title}"?',
+          ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false), 
+              onPressed: () => Navigator.pop(dialogContext, false),
               child: const Text('Batal'),
             ),
             TextButton(
-              onPressed: () => Navigator.pop(dialogContext, true), 
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFFDC2626),
+              ),
               child: const Text('Hapus'),
             ),
           ],
@@ -33,21 +55,30 @@ class CourseDetailScreen extends StatelessWidget {
     );
 
     if (confirm != true) return;
-    if (!context.mounted) return; 
+    if (!context.mounted) return;
 
     final provider = context.read<CourseProvider>();
-    final success = await provider.deleteCourse(course.id ?? 1, course.code);
+    final success = await provider.deleteCourse(
+      course.id ?? 1,
+      course.code,
+    );
 
     if (!context.mounted) return;
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Course berhasil dihapus!'), backgroundColor: Colors.green),
+        const SnackBar(
+          content: Text('Course berhasil dihapus!'),
+          backgroundColor: Colors.green,
+        ),
       );
-      Navigator.pop(context); 
+      Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menghapus: ${provider.error}'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Gagal menghapus: ${provider.error}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -57,15 +88,17 @@ class CourseDetailScreen extends StatelessWidget {
     final provider = context.watch<CourseProvider>();
 
     final updatedCourse = provider.courses.firstWhere(
-      (c) => c.code == course.code, 
-      orElse: () => course, 
+      (c) => c.code == course.code,
+      orElse: () => course,
     );
-    
+
     final isFavorite = provider.isFavorite(updatedCourse.code);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(updatedCourse.title), 
+        title: Text(updatedCourse.title),
+        backgroundColor: _darkBlue,
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -73,7 +106,8 @@ class CourseDetailScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => EditCourseScreen(course: updatedCourse), 
+                  builder: (context) =>
+                      EditCourseScreen(course: updatedCourse),
                 ),
               );
             },
@@ -89,40 +123,63 @@ class CourseDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '$studentId\n$studentName',
-              style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            
+            _buildStudentLabel(),
+
             Text(
               updatedCourse.title,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Text('Kode Mata Kuliah: ${updatedCourse.code}', style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 8),
-            Text('Jumlah SKS: ${updatedCourse.credits}', style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 8),
-            Text('Status: ${updatedCourse.status.toUpperCase()}', 
-              style: TextStyle(
-                fontSize: 16, 
+              style: const TextStyle(
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: updatedCourse.status == 'done' ? Colors.green : Colors.orange,
               ),
             ),
+            const SizedBox(height: 12),
+
+            Text(
+              'Kode Mata Kuliah: ${updatedCourse.code}',
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+
+            Text(
+              'Jumlah SKS: ${updatedCourse.credits}',
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+
+            Text(
+              'Status: ${updatedCourse.status.toUpperCase()}',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: updatedCourse.status == 'done'
+                    ? Colors.green
+                    : Colors.orange,
+              ),
+            ),
+
             const Divider(height: 32),
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isFavorite ? Colors.red.shade100 : Colors.blue,
-                  foregroundColor: isFavorite ? Colors.red : Colors.white,
+                  backgroundColor:
+                      isFavorite ? Colors.red.shade100 : _primaryBlue,
+                  foregroundColor:
+                      isFavorite ? Colors.red : Colors.white,
                 ),
-                icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
-                label: Text(isFavorite ? 'Hapus dari Favorit' : 'Tandai sebagai Favorit'),
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                ),
+                label: Text(
+                  isFavorite
+                      ? 'Hapus dari Favorit'
+                      : 'Tandai sebagai Favorit',
+                ),
                 onPressed: () {
-                  context.read<CourseProvider>().toggleFavorite(updatedCourse.code);
+                  context
+                      .read<CourseProvider>()
+                      .toggleFavorite(updatedCourse.code);
                 },
               ),
             ),
