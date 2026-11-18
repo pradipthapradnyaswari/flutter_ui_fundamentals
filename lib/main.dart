@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'app_keys.dart';
 import 'models/course.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
@@ -55,6 +56,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Learning Dashboard',
       theme: ThemeData(primarySwatch: Colors.blue),
+      navigatorKey: navigatorKey,
+      scaffoldMessengerKey: messengerKey,
       home: AuthGate(
         authenticatedBuilder: (_) => const DashboardPage(),
       ),
