@@ -18,6 +18,13 @@ class CourseProvider extends ChangeNotifier {
   bool isLoadingFavorites = false;
   String? favoriteError;
 
+    void clearFavorites() {
+    favorites.clear();
+    favoriteError = null;
+    isLoadingFavorites = false;
+    notifyListeners();
+  }
+
   Future<void> loadCourses() async {
     isLoading = true;
     error = null;
@@ -33,18 +40,15 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
-  // Memuat favorit dari Supabase.
   Future<void> loadFavorites() async {
+    favorites.clear();
     isLoadingFavorites = true;
     favoriteError = null;
     notifyListeners();
 
     try {
       final favoriteCodes = await repository.getFavorites();
-
-      favorites
-        ..clear()
-        ..addAll(favoriteCodes);
+      favorites.addAll(favoriteCodes);
     } catch (e) {
       favoriteError = e.toString();
     } finally {
@@ -53,13 +57,12 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
-  // Menambah atau menghapus favorit di Supabase.
+
   Future<void> toggleFavorite(String courseCode) async {
     if (isLoadingFavorites) return;
 
     final wasFavorite = favorites.contains(courseCode);
 
-    // Simpan kondisi sebelumnya untuk pemulihan jika gagal.
     if (wasFavorite) {
       favorites.remove(courseCode);
     } else {
@@ -76,7 +79,6 @@ class CourseProvider extends ChangeNotifier {
         await repository.addFavorite(courseCode);
       }
     } catch (e) {
-      // Kembalikan tampilan jika penyimpanan gagal.
       if (wasFavorite) {
         favorites.add(courseCode);
       } else {

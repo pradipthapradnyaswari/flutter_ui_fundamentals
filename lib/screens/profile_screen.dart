@@ -1,7 +1,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/course_provider.dart';
 import '../services/auth_service.dart';
 import '../services/profile_service.dart';
 
@@ -107,48 +109,52 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _logout(BuildContext context) async {
-    final shouldLogout = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(
-          'Logout',
-          style: TextStyle(color: _darkBlue),
+  final shouldLogout = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text(
+        'Logout',
+        style: TextStyle(color: _darkBlue),
+      ),
+      content: const Text('Apakah kamu yakin ingin keluar?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          style: TextButton.styleFrom(
+            foregroundColor: _secondaryTextColor,
+          ),
+          child: const Text('Batal'),
         ),
-        content: const Text('Apakah kamu yakin ingin keluar?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            style: TextButton.styleFrom(
-              foregroundColor: _secondaryTextColor,
-            ),
-            child: const Text('Batal'),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          style: FilledButton.styleFrom(
+            backgroundColor: _logoutRed,
+            foregroundColor: Colors.white,
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: _logoutRed,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Logout'),
-          ),
-        ],
+          child: const Text('Logout'),
+        ),
+      ],
+    ),
+  );
+
+  if (shouldLogout != true || !context.mounted) return;
+
+  final courseProvider = context.read<CourseProvider>();
+
+  try {
+    await AuthService.instance.logout();
+
+    courseProvider.clearFavorites();
+  } catch (e) {
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Gagal logout. Silakan coba lagi.'),
       ),
     );
-
-    if (shouldLogout != true || !context.mounted) return;
-
-    try {
-      await AuthService.instance.logout();
-    } catch (e) {
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Gagal logout. Silakan coba lagi.'),
-        ),
-      );
-    }
   }
+}
 
   String _getRoleName(String role) {
     switch (role) {
