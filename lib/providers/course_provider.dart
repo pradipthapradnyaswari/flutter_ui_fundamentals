@@ -1,4 +1,6 @@
+
 import 'package:flutter/foundation.dart';
+
 import '../../models/course.dart';
 import '../../repositories/course_repository.dart';
 
@@ -12,6 +14,9 @@ class CourseProvider extends ChangeNotifier {
   String? error;
 
   final Set<String> favorites = {};
+
+  bool isLoadingFavorites = false;
+  String? favoriteError;
 
   Future<void> loadCourses() async {
     isLoading = true;
@@ -28,13 +33,60 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
-  void toggleFavorite(String courseCode) {
-    if (favorites.contains(courseCode)) {
+  // Memuat favorit dari Supabase.
+  Future<void> loadFavorites() async {
+    isLoadingFavorites = true;
+    favoriteError = null;
+    notifyListeners();
+
+    try {
+      final favoriteCodes = await repository.getFavorites();
+
+      favorites
+        ..clear()
+        ..addAll(favoriteCodes);
+    } catch (e) {
+      favoriteError = e.toString();
+    } finally {
+      isLoadingFavorites = false;
+      notifyListeners();
+    }
+  }
+
+  // Menambah atau menghapus favorit di Supabase.
+  Future<void> toggleFavorite(String courseCode) async {
+    if (isLoadingFavorites) return;
+
+    final wasFavorite = favorites.contains(courseCode);
+
+    // Simpan kondisi sebelumnya untuk pemulihan jika gagal.
+    if (wasFavorite) {
       favorites.remove(courseCode);
     } else {
       favorites.add(courseCode);
     }
+
+    favoriteError = null;
     notifyListeners();
+
+    try {
+      if (wasFavorite) {
+        await repository.removeFavorite(courseCode);
+      } else {
+        await repository.addFavorite(courseCode);
+      }
+    } catch (e) {
+      // Kembalikan tampilan jika penyimpanan gagal.
+      if (wasFavorite) {
+        favorites.add(courseCode);
+      } else {
+        favorites.remove(courseCode);
+      }
+
+      favoriteError = e.toString();
+      notifyListeners();
+      rethrow;
+    }
   }
 
   bool isFavorite(String courseCode) {
@@ -44,7 +96,6 @@ class CourseProvider extends ChangeNotifier {
   Future<bool> addCourse(Course course) async {
     try {
       await repository.createCourse(course);
-      
       await loadCourses();
       return true;
     } catch (e) {
@@ -69,12 +120,14 @@ class CourseProvider extends ChangeNotifier {
   Future<bool> deleteCourse(int id, String courseCode) async {
     try {
       await repository.deleteCourse(id);
-      
+
       if (favorites.contains(courseCode)) {
+        await repository.removeFavorite(courseCode);
         favorites.remove(courseCode);
       }
-      
-      await loadCourses(); 
+
+      await loadCourses();
+      notifyListeners();
       return true;
     } catch (e) {
       error = e.toString();

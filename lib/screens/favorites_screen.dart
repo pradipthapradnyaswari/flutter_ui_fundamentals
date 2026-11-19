@@ -38,9 +38,9 @@ class FavoritesScreen extends StatelessWidget {
               return CourseCardPropDrilling(
                 course: course,
                 isFavorite: true,
-                onFavoriteToggle: () {
-                  provider.toggleFavorite(course.code);
-                },
+                onFavoriteToggle: () async {
+  await provider.toggleFavorite(course.code);
+},
               );
             },
           );

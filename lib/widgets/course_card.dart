@@ -1,11 +1,13 @@
+
 import 'package:flutter/material.dart';
+
 import '../models/course.dart';
-import '../screens/course_detail_screen.dart'; 
+import '../screens/course_detail_screen.dart';
 
 class CourseCardPropDrilling extends StatelessWidget {
   final Course course;
-  final bool isFavorite; 
-  final VoidCallback onFavoriteToggle; 
+  final bool isFavorite;
+  final Future<void> Function() onFavoriteToggle;
 
   const CourseCardPropDrilling({
     super.key,
@@ -24,18 +26,32 @@ class CourseCardPropDrilling extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => CourseDetailScreen(course: course),
+              builder: (context) =>
+                  CourseDetailScreen(course: course),
             ),
           );
         },
         title: Text(course.title),
-        subtitle: Text('SKS: ${course.credits}'), 
+        subtitle: Text('SKS: ${course.credits}'),
         trailing: IconButton(
           icon: Icon(
             isFavorite ? Icons.favorite : Icons.favorite_border,
             color: isFavorite ? Colors.red : Colors.grey,
           ),
-          onPressed: onFavoriteToggle, 
+          onPressed: () async {
+            try {
+              await onFavoriteToggle();
+            } catch (e) {
+              if (!context.mounted) return;
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Gagal memperbarui favorit: $e'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
         ),
       ),
     );

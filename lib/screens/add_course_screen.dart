@@ -1,8 +1,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/course.dart';
 import '../providers/course_provider.dart';
+import '../services/profile_service.dart';
 import '../main.dart' show studentId, studentName;
 
 class AddCourseScreen extends StatefulWidget {
@@ -17,12 +19,20 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   static const Color _darkBlue = Color(0xFF1E40AF);
 
   final _formKey = GlobalKey<FormState>();
+  late Future<UserProfile?> _profileFuture;
+
   bool _isSaving = false;
 
   String _code = '';
   String _title = '';
   int _credits = 0;
   String _status = 'planned';
+
+  @override
+  void initState() {
+    super.initState();
+    _profileFuture = ProfileService().getMyProfile();
+  }
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
@@ -62,8 +72,43 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildAccessDenied() {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Akses Ditolak'),
+        backgroundColor: _darkBlue,
+        foregroundColor: Colors.white,
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.lock_outline,
+                size: 64,
+                color: Colors.red,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Anda tidak memiliki izin untuk menambahkan course.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Kembali'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForm() {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tambah Course Baru'),
@@ -183,6 +228,37 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<UserProfile?>(
+      future: _profileFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Memeriksa Akses'),
+              backgroundColor: _darkBlue,
+              foregroundColor: Colors.white,
+            ),
+            body: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        final profile = snapshot.data;
+
+        if (snapshot.hasError ||
+            profile == null ||
+            !['lecturer', 'admin'].contains(profile.role)) {
+          return _buildAccessDenied();
+        }
+
+        return _buildForm();
+      },
     );
   }
 }

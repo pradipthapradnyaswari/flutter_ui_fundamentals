@@ -1,18 +1,36 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/course.dart';
 import '../providers/course_provider.dart';
+import '../services/profile_service.dart';
 import '../main.dart' show studentId, studentName;
 import 'edit_course_screen.dart';
 
-class CourseDetailScreen extends StatelessWidget {
+class CourseDetailScreen extends StatefulWidget {
   final Course course;
 
-  const CourseDetailScreen({super.key, required this.course});
+  const CourseDetailScreen({
+    super.key,
+    required this.course,
+  });
 
+  @override
+  State<CourseDetailScreen> createState() => _CourseDetailScreenState();
+}
+
+class _CourseDetailScreenState extends State<CourseDetailScreen> {
   static const Color _primaryBlue = Color(0xFF2563EB);
   static const Color _darkBlue = Color(0xFF1E40AF);
+
+  late Future<UserProfile?> _profileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileFuture = ProfileService().getMyProfile();
+  }
 
   Widget _buildStudentLabel() {
     return Padding(
@@ -28,7 +46,7 @@ class CourseDetailScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmDelete(BuildContext context) async {
+  Future<void> _confirmDelete(BuildContext context, Course course) async {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -88,104 +106,127 @@ class CourseDetailScreen extends StatelessWidget {
     final provider = context.watch<CourseProvider>();
 
     final updatedCourse = provider.courses.firstWhere(
-      (c) => c.code == course.code,
-      orElse: () => course,
+      (c) => c.code == widget.course.code,
+      orElse: () => widget.course,
     );
 
     final isFavorite = provider.isFavorite(updatedCourse.code);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(updatedCourse.title),
-        backgroundColor: _darkBlue,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      EditCourseScreen(course: updatedCourse),
+    return FutureBuilder<UserProfile?>(
+      future: _profileFuture,
+      builder: (context, snapshot) {
+        final role = snapshot.data?.role ?? '';
+        final canManageCourse =
+            !snapshot.hasError &&
+            snapshot.connectionState == ConnectionState.done &&
+            ['lecturer', 'admin'].contains(role);
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(updatedCourse.title),
+            backgroundColor: _darkBlue,
+            foregroundColor: Colors.white,
+            actions: [
+              if (canManageCourse) ...[
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  tooltip: 'Edit Course',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            EditCourseScreen(course: updatedCourse),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  tooltip: 'Hapus Course',
+                  onPressed: () =>
+                      _confirmDelete(context, updatedCourse),
+                ),
+              ],
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () => _confirmDelete(context),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildStudentLabel(),
+                Text(
+                  updatedCourse.title,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Kode Mata Kuliah: ${updatedCourse.code}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Jumlah SKS: ${updatedCourse.credits}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Status: ${updatedCourse.status.toUpperCase()}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: updatedCourse.status == 'done'
+                        ? Colors.green
+                        : Colors.orange,
+                  ),
+                ),
+                const Divider(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          isFavorite ? Colors.red.shade100 : _primaryBlue,
+                      foregroundColor:
+                          isFavorite ? Colors.red : Colors.white,
+                    ),
+                    icon: Icon(
+                      isFavorite
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                    ),
+                    label: Text(
+                      isFavorite
+                          ? 'Hapus dari Favorit'
+                          : 'Tandai sebagai Favorit',
+                    ),
+                    onPressed: () async {
+  try {
+    await context
+        .read<CourseProvider>()
+        .toggleFavorite(updatedCourse.code);
+  } catch (e) {
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Gagal memperbarui favorit: $e'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+},
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildStudentLabel(),
-
-            Text(
-              updatedCourse.title,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            Text(
-              'Kode Mata Kuliah: ${updatedCourse.code}',
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-
-            Text(
-              'Jumlah SKS: ${updatedCourse.credits}',
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-
-            Text(
-              'Status: ${updatedCourse.status.toUpperCase()}',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: updatedCourse.status == 'done'
-                    ? Colors.green
-                    : Colors.orange,
-              ),
-            ),
-
-            const Divider(height: 32),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      isFavorite ? Colors.red.shade100 : _primaryBlue,
-                  foregroundColor:
-                      isFavorite ? Colors.red : Colors.white,
-                ),
-                icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                ),
-                label: Text(
-                  isFavorite
-                      ? 'Hapus dari Favorit'
-                      : 'Tandai sebagai Favorit',
-                ),
-                onPressed: () {
-                  context
-                      .read<CourseProvider>()
-                      .toggleFavorite(updatedCourse.code);
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 }

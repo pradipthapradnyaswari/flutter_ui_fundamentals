@@ -58,4 +58,23 @@ class CourseApiService implements CourseDataSource {
       throw Exception('Gagal menghapus course HTTP: ${response.statusCode}');
     }
   }
+
+  @override
+Future<List<String>> getFavorites() async {
+  return [];
+}
+
+@override
+Future<void> addFavorite(String courseCode) async {
+  throw UnsupportedError(
+    'Fitur favorit hanya tersedia pada Supabase.',
+  );
+}
+
+@override
+Future<void> removeFavorite(String courseCode) async {
+  throw UnsupportedError(
+    'Fitur favorit hanya tersedia pada Supabase.',
+  );
+}
 }

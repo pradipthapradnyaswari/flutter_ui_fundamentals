@@ -38,11 +38,11 @@ class CoursesScreen extends StatelessWidget {
               return CourseCardPropDrilling(
                 course: course,
                 isFavorite: isFav,
-                onFavoriteToggle: () {
-                  context
-                      .read<CourseProvider>()
-                      .toggleFavorite(course.code);
-                },
+                onFavoriteToggle: () async {
+  await context
+      .read<CourseProvider>()
+      .toggleFavorite(course.code);
+},
               );
             },
           ),

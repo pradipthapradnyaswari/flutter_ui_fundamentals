@@ -1,3 +1,4 @@
+
 import '../models/course.dart';
 import '../services/course_data_source.dart';
 
@@ -8,9 +9,22 @@ class CourseRepository {
 
   Future<List<Course>> getCourses() => dataSource.getCourses();
 
-  Future<Course> createCourse(Course course) => dataSource.createCourse(course);
+  Future<Course> createCourse(Course course) =>
+      dataSource.createCourse(course);
 
-  Future<void> updateCourse(int id, Course course) => dataSource.updateCourse(id, course);
+  Future<void> updateCourse(int id, Course course) =>
+      dataSource.updateCourse(id, course);
 
-  Future<void> deleteCourse(int id) => dataSource.deleteCourse(id);
+  Future<void> deleteCourse(int id) =>
+      dataSource.deleteCourse(id);
+
+  // Favorite
+  Future<List<String>> getFavorites() =>
+      dataSource.getFavorites();
+
+  Future<void> addFavorite(String courseCode) =>
+      dataSource.addFavorite(courseCode);
+
+  Future<void> removeFavorite(String courseCode) =>
+      dataSource.removeFavorite(courseCode);
 }
