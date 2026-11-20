@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../services/notification_service.dart';
 import '../main.dart' show studentName, studentId;
 import '../providers/course_provider.dart';
 import '../services/profile_service.dart';
@@ -30,21 +31,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
   static const Color _darkBlue = Color(0xFF1E40AF);
   static const Color _primaryBlue = Color(0xFF2563EB);
 
-  @override
-  void initState() {
-    super.initState();
+  
+@override
+void initState() {
+  super.initState();
 
-    _profileFuture = ProfileService().getMyProfile();
+  _profileFuture = ProfileService().getMyProfile();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-  if (!mounted) return;
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    if (!mounted) return;
 
-  final provider = context.read<CourseProvider>();
+    await NotificationService.instance.init();
 
-  provider.loadCourses();
-  provider.loadFavorites();
-});
-  }
+    if (!mounted) return;
+
+    final provider = context.read<CourseProvider>();
+    provider.loadCourses();
+    provider.loadFavorites();
+  });
+}
+
 
   Widget _buildIdentityLabel() {
     return Container(

@@ -1,4 +1,3 @@
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -7,6 +6,10 @@
         android:label="flutter_ui_fundamentals"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <meta-data
+            android:name="firebase_messaging_installation_id_enabled"
+            android:value="true" />
 
         <activity
             android:name=".MainActivity"

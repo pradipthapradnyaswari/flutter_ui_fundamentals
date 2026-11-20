@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+import 'services/notification_service.dart';
 import 'firebase_options.dart';
 import 'app_keys.dart';
 import 'providers/course_provider.dart';
@@ -32,30 +33,27 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  FirebaseMessaging.onBackgroundMessage(
+  firebaseMessagingBackgroundHandler,
+);
+
   final messaging = FirebaseMessaging.instance;
 
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    debugPrint('FCM MESSAGE DITERIMA!');
-    debugPrint('Title: ${message.notification?.title}');
-    debugPrint('Body: ${message.notification?.body}');
-  });
+messaging.onRegistered.listen(
+  (installationId) {
+    debugPrint('Firebase Installation ID: $installationId');
+  },
+  onError: (error) {
+    debugPrint('FCM Registration Error: $error');
+  },
+);
 
-  final settings = await messaging.requestPermission();
-
-  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-    messaging.onRegistered.listen(
-      (installationId) {
-        debugPrint('Firebase Installation ID: $installationId');
-      },
-      onError: (error) {
-        debugPrint('FCM Registration Error: $error');
-      },
-    );
-
-    await messaging.register();
-  } else {
-    debugPrint('Izin notifikasi belum diberikan.');
-  }
+try {
+  await messaging.register();
+  debugPrint('FCM registration berhasil dimulai.');
+} catch (error) {
+  debugPrint('FCM Registration Error: $error');
+}
 
   await Supabase.initialize(
     url: supabaseUrl,
