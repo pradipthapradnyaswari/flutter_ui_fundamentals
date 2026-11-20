@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -31,34 +30,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
   static const Color _darkBlue = Color(0xFF1E40AF);
   static const Color _primaryBlue = Color(0xFF2563EB);
 
-  
-@override
-void initState() {
-  super.initState();
+  @override
+  void initState() {
+    super.initState();
 
-  _profileFuture = ProfileService().getMyProfile();
+    _profileFuture = ProfileService().getMyProfile();
 
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
-    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
 
-    await NotificationService.instance.init();
+      final provider = context.read<CourseProvider>();
 
-    if (!mounted) return;
+      await NotificationService.instance.init();
 
-    final provider = context.read<CourseProvider>();
-    provider.loadCourses();
-    provider.loadFavorites();
-  });
-}
+      if (!mounted) return;
 
+      await provider.loadCourses();
+      provider.loadFavorites();
+
+      NotificationService.instance.setupInteractedMessage();
+    });
+  }
 
   Widget _buildIdentityLabel() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 10,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       alignment: Alignment.center,
       child: Text(
         '$studentName - $studentId',
@@ -72,9 +69,7 @@ void initState() {
     );
   }
 
-  Widget _buildAddCourseButton({
-    required String role,
-  }) {
+  Widget _buildAddCourseButton({required String role}) {
     return RoleGuard(
       role: role,
       allowed: const ['lecturer', 'admin'],
@@ -83,9 +78,7 @@ void initState() {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const AddCourseScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const AddCourseScreen()),
           );
         },
         backgroundColor: _primaryBlue,
@@ -109,11 +102,7 @@ void initState() {
         ),
         body: Column(
           children: [
-            const Expanded(
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
+            const Expanded(child: Center(child: CircularProgressIndicator())),
             _buildIdentityLabel(),
           ],
         ),
@@ -174,8 +163,7 @@ void initState() {
     return FutureBuilder<UserProfile?>(
       future: _profileFuture,
       builder: (context, profileSnapshot) {
-        final String role =
-            profileSnapshot.data?.role ?? '';
+        final String role = profileSnapshot.data?.role ?? '';
 
         return LayoutBuilder(
           builder: (context, constraints) {
@@ -241,13 +229,8 @@ void initState() {
                             ],
                           ),
                         if (isExpanded)
-                          const VerticalDivider(
-                            width: 1,
-                            thickness: 1,
-                          ),
-                        Expanded(
-                          child: pages[_currentIndex],
-                        ),
+                          const VerticalDivider(width: 1, thickness: 1),
+                        Expanded(child: pages[_currentIndex]),
                       ],
                     ),
                   ),
