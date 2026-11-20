@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
+import 'firebase_options.dart';
 import 'app_keys.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
@@ -20,14 +23,44 @@ const String apiBaseUrl = 'https://jsonplaceholder.typicode.com';
 const String supabaseUrl = 'https://bsdruahkljuzencndnhq.supabase.co';
 const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzZHJ1YWhrbGp1emVuY25kbmhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMDc0NTgsImV4cCI6MjEwODc4MzQ1OH0.QceZacD92EQtq6Z56tKkZyt4qxPKYkx5TVtyjVqkOKc';
 
+
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-await Supabase.initialize(
-  url: supabaseUrl,
-  publishableKey: supabaseAnonKey,
-);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
+  final messaging = FirebaseMessaging.instance;
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    debugPrint('FCM MESSAGE DITERIMA!');
+    debugPrint('Title: ${message.notification?.title}');
+    debugPrint('Body: ${message.notification?.body}');
+  });
+
+  final settings = await messaging.requestPermission();
+
+  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    messaging.onRegistered.listen(
+      (installationId) {
+        debugPrint('Firebase Installation ID: $installationId');
+      },
+      onError: (error) {
+        debugPrint('FCM Registration Error: $error');
+      },
+    );
+
+    await messaging.register();
+  } else {
+    debugPrint('Izin notifikasi belum diberikan.');
+  }
+
+  await Supabase.initialize(
+    url: supabaseUrl,
+    publishableKey: supabaseAnonKey,
+  );
 
   final CourseDataSource dataSource = CourseSupabaseService();
   final repository = CourseRepository(dataSource);
